@@ -64,17 +64,17 @@ for epoch in range(num_epochs):
     # Set initial hidden and cell states
     states = (torch.zeros(num_layers, batch_size, hidden_size).to(device),
               torch.zeros(num_layers, batch_size, hidden_size).to(device))
-    
+
     for i in range(0, ids.size(1) - seq_length, seq_length):
         # Get mini-batch inputs and targets
         inputs = ids[:, i:i+seq_length].to(device)
         targets = ids[:, (i+1):(i+1)+seq_length].to(device)
-        
+
         # Forward pass
         states = detach(states)
         outputs, states = model(inputs, states)
         loss = criterion(outputs, targets.reshape(-1))
-        
+
         # Backward and optimize
         optimizer.zero_grad()
         loss.backward()
@@ -110,11 +110,11 @@ with torch.no_grad():
 
             # File write
             word = corpus.dictionary.idx2word[word_id]
-            word = '\n' if word == '<eos>' else word + ' '
+            word = '\n' if word == '<eos>' else f'{word} '
             f.write(word)
 
             if (i+1) % 100 == 0:
-                print('Sampled [{}/{}] words and save to {}'.format(i+1, num_samples, 'sample.txt'))
+                print(f'Sampled [{i + 1}/{num_samples}] words and save to sample.txt')
 
 # Save the model checkpoints
 torch.save(model.state_dict(), 'model.ckpt')

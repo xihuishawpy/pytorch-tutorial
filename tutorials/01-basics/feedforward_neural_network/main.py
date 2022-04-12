@@ -61,16 +61,16 @@ for epoch in range(num_epochs):
         # Move tensors to the configured device
         images = images.reshape(-1, 28*28).to(device)
         labels = labels.to(device)
-        
+
         # Forward pass
         outputs = model(images)
         loss = criterion(outputs, labels)
-        
+
         # Backward and optimize
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        
+
         if (i+1) % 100 == 0:
             print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}' 
                    .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
@@ -88,7 +88,10 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
-    print('Accuracy of the network on the 10000 test images: {} %'.format(100 * correct / total))
+    print(
+        f'Accuracy of the network on the 10000 test images: {100 * correct / total} %'
+    )
+
 
 # Save the model checkpoint
 torch.save(model.state_dict(), 'model.ckpt')

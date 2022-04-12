@@ -82,7 +82,7 @@ total_step = len(data_loader)
 for epoch in range(num_epochs):
     for i, (images, _) in enumerate(data_loader):
         images = images.reshape(batch_size, -1).to(device)
-        
+
         # Create the labels which are later used as input for the BCE loss
         real_labels = torch.ones(batch_size, 1).to(device)
         fake_labels = torch.zeros(batch_size, 1).to(device)
@@ -96,7 +96,7 @@ for epoch in range(num_epochs):
         outputs = D(images)
         d_loss_real = criterion(outputs, real_labels)
         real_score = outputs
-        
+
         # Compute BCELoss using fake images
         # First term of the loss is always zero since fake_labels == 0
         z = torch.randn(batch_size, latent_size).to(device)
@@ -104,13 +104,13 @@ for epoch in range(num_epochs):
         outputs = D(fake_images)
         d_loss_fake = criterion(outputs, fake_labels)
         fake_score = outputs
-        
+
         # Backprop and optimize
         d_loss = d_loss_real + d_loss_fake
         reset_grad()
         d_loss.backward()
         d_optimizer.step()
-        
+
         # ================================================================== #
         #                        Train the generator                         #
         # ================================================================== #
@@ -119,29 +119,33 @@ for epoch in range(num_epochs):
         z = torch.randn(batch_size, latent_size).to(device)
         fake_images = G(z)
         outputs = D(fake_images)
-        
+
         # We train G to maximize log(D(G(z)) instead of minimizing log(1-D(G(z)))
         # For the reason, see the last paragraph of section 3. https://arxiv.org/pdf/1406.2661.pdf
         g_loss = criterion(outputs, real_labels)
-        
+
         # Backprop and optimize
         reset_grad()
         g_loss.backward()
         g_optimizer.step()
-        
+
         if (i+1) % 200 == 0:
             print('Epoch [{}/{}], Step [{}/{}], d_loss: {:.4f}, g_loss: {:.4f}, D(x): {:.2f}, D(G(z)): {:.2f}' 
                   .format(epoch, num_epochs, i+1, total_step, d_loss.item(), g_loss.item(), 
                           real_score.mean().item(), fake_score.mean().item()))
-    
+
     # Save real images
-    if (epoch+1) == 1:
+    if epoch == 0:
         images = images.reshape(images.size(0), 1, 28, 28)
         save_image(denorm(images), os.path.join(sample_dir, 'real_images.png'))
-    
+
     # Save sampled images
     fake_images = fake_images.reshape(fake_images.size(0), 1, 28, 28)
-    save_image(denorm(fake_images), os.path.join(sample_dir, 'fake_images-{}.png'.format(epoch+1)))
+    save_image(
+        denorm(fake_images),
+        os.path.join(sample_dir, f'fake_images-{epoch + 1}.png'),
+    )
+
 
 # Save the model checkpoints 
 torch.save(G.state_dict(), 'G.ckpt')

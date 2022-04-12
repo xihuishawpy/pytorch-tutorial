@@ -39,7 +39,7 @@ model = NeuralNet().to(device)
 logger = Logger('./logs')
 
 # Loss and optimizer
-criterion = nn.CrossEntropyLoss()  
+criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)  
 
 data_iter = iter(data_loader)
@@ -56,11 +56,11 @@ for step in range(total_step):
     # Fetch images and labels
     images, labels = next(data_iter)
     images, labels = images.view(images.size(0), -1).to(device), labels.to(device)
-    
+
     # Forward pass
     outputs = model(images)
     loss = criterion(outputs, labels)
-    
+
     # Backward and optimize
     optimizer.zero_grad()
     loss.backward()
@@ -88,7 +88,7 @@ for step in range(total_step):
         for tag, value in model.named_parameters():
             tag = tag.replace('.', '/')
             logger.histo_summary(tag, value.data.cpu().numpy(), step+1)
-            logger.histo_summary(tag+'/grad', value.grad.data.cpu().numpy(), step+1)
+            logger.histo_summary(f'{tag}/grad', value.grad.data.cpu().numpy(), step+1)
 
         # 3. Log training images (image summary)
         info = { 'images': images.view(-1, 28, 28)[:10].cpu().numpy() }

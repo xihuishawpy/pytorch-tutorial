@@ -94,11 +94,9 @@ class ResNet(nn.Module):
             downsample = nn.Sequential(
                 conv3x3(self.in_channels, out_channels, stride=stride),
                 nn.BatchNorm2d(out_channels))
-        layers = []
-        layers.append(block(self.in_channels, out_channels, stride, downsample))
+        layers = [block(self.in_channels, out_channels, stride, downsample)]
         self.in_channels = out_channels
-        for i in range(1, blocks):
-            layers.append(block(out_channels, out_channels))
+        layers.extend(block(out_channels, out_channels) for _ in range(1, blocks))
         return nn.Sequential(*layers)
     
     def forward(self, x):
@@ -132,16 +130,16 @@ for epoch in range(num_epochs):
     for i, (images, labels) in enumerate(train_loader):
         images = images.to(device)
         labels = labels.to(device)
-        
+
         # Forward pass
         outputs = model(images)
         loss = criterion(outputs, labels)
-        
+
         # Backward and optimize
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        
+
         if (i+1) % 100 == 0:
             print ("Epoch [{}/{}], Step [{}/{}] Loss: {:.4f}"
                    .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
@@ -164,7 +162,7 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
-    print('Accuracy of the model on the test images: {} %'.format(100 * correct / total))
+    print(f'Accuracy of the model on the test images: {100 * correct / total} %')
 
 # Save the model checkpoint
 torch.save(model.state_dict(), 'resnet.ckpt')

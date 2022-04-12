@@ -1,4 +1,4 @@
-import torch 
+import torch
 import torchvision
 import torch.nn as nn
 import numpy as np
@@ -67,7 +67,7 @@ print('loss: ', loss.item())
 loss.backward()
 
 # Print out the gradients.
-print ('dL/dw: ', linear.weight.grad) 
+print ('dL/dw: ', linear.weight.grad)
 print ('dL/db: ', linear.bias.grad)
 
 # 1-step gradient descent.
@@ -122,11 +122,6 @@ data_iter = iter(train_loader)
 
 # Mini-batch images and labels.
 images, labels = data_iter.next()
-
-# Actual usage of the data loader is as below.
-for images, labels in train_loader:
-    # Training code should be written here.
-    pass
 
 
 # ================================================================== #

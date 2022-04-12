@@ -73,29 +73,29 @@ for epoch in range(num_epochs):
         # Forward pass
         x = x.to(device).view(-1, image_size)
         x_reconst, mu, log_var = model(x)
-        
+
         # Compute reconstruction loss and kl divergence
         # For KL divergence, see Appendix B in VAE paper or http://yunjey47.tistory.com/43
         reconst_loss = F.binary_cross_entropy(x_reconst, x, size_average=False)
         kl_div = - 0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
-        
+
         # Backprop and optimize
         loss = reconst_loss + kl_div
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        
+
         if (i+1) % 10 == 0:
             print ("Epoch[{}/{}], Step [{}/{}], Reconst Loss: {:.4f}, KL Div: {:.4f}" 
                    .format(epoch+1, num_epochs, i+1, len(data_loader), reconst_loss.item(), kl_div.item()))
-    
+
     with torch.no_grad():
         # Save the sampled images
         z = torch.randn(batch_size, z_dim).to(device)
         out = model.decode(z).view(-1, 1, 28, 28)
-        save_image(out, os.path.join(sample_dir, 'sampled-{}.png'.format(epoch+1)))
+        save_image(out, os.path.join(sample_dir, f'sampled-{epoch + 1}.png'))
 
         # Save the reconstructed images
         out, _, _ = model(x)
         x_concat = torch.cat([x.view(-1, 1, 28, 28), out.view(-1, 1, 28, 28)], dim=3)
-        save_image(x_concat, os.path.join(sample_dir, 'reconst-{}.png'.format(epoch+1)))
+        save_image(x_concat, os.path.join(sample_dir, f'reconst-{epoch + 1}.png'))

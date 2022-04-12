@@ -56,18 +56,18 @@ def main(config):
         transforms.ToTensor(),
         transforms.Normalize(mean=(0.485, 0.456, 0.406), 
                              std=(0.229, 0.224, 0.225))])
-    
+
     # Load content and style images
     # Make the style image same size as the content image
     content = load_image(config.content, transform, max_size=config.max_size)
     style = load_image(config.style, transform, shape=[content.size(2), content.size(3)])
-    
+
     # Initialize a target image with the content image
     target = content.clone().requires_grad_(True)
-    
+
     optimizer = torch.optim.Adam([target], lr=config.lr, betas=[0.5, 0.999])
     vgg = VGGNet().to(device).eval()
-    
+
     for step in range(config.total_step):
         
         # Extract multiple(5) conv feature vectors
@@ -92,9 +92,9 @@ def main(config):
 
             # Compute style loss with target and style images
             style_loss += torch.mean((f1 - f3)**2) / (c * h * w) 
-        
+
         # Compute total loss, backprop and optimize
-        loss = content_loss + config.style_weight * style_loss 
+        loss = content_loss + config.style_weight * style_loss
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -108,7 +108,7 @@ def main(config):
             denorm = transforms.Normalize((-2.12, -2.04, -1.80), (4.37, 4.46, 4.44))
             img = target.clone().squeeze()
             img = denorm(img).clamp_(0, 1)
-            torchvision.utils.save_image(img, 'output-{}.png'.format(step+1))
+            torchvision.utils.save_image(img, f'output-{step + 1}.png')
 
 
 if __name__ == "__main__":
